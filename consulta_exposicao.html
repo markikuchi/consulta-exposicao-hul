@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  Consulta Individual de Exposicao Ocupacional v3.0
+  Consulta Individual de Exposicao Ocupacional v5.0
   Autoatendimento: empregado consulta sua analise mensal
   Bio (NR-15 Anexo 14) + Radiacao Ionizante (NR-16)
   Controle de liberacao via aba CONSULTA_CONTROLE
@@ -13,194 +13,753 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Consulta de Exposicao Ocupacional · USOST/HUL</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --az: #1a2744; --azm: #1a3a6c; --azc: #e8f0fb;
-  --vr: #c0392b; --vrc: #fdf0ef;
-  --vd: #1a5c33; --vc: #eaf5ec;
-  --am: #d4a017; --amc: #fef9e7;
-  --bg: #f7f8fa; --bd: #dde1e7; --mt: #6b7280;
-  --tx: #1a1d23; --br: #ffffff;
-  --r: 10px; --sh: 0 1px 4px rgba(0,0,0,0.07);
-  --f: 'IBM Plex Sans',sans-serif; --m: 'IBM Plex Mono',monospace;
-  --rad: #8e44ad; --radc: #f5eef8;
-  --bio: #2563eb; --bioc: #eff6ff;
+  --bio: #2563eb;
+  --bio-g: linear-gradient(135deg, #1d4ed8, #3b82f6, #60a5fa);
+  --bio-bg: #eff6ff;
+  --bio-glow: rgba(37,99,235,.15);
+
+  --rad: #d97706;
+  --rad-g: linear-gradient(135deg, #b45309, #d97706, #f59e0b);
+  --rad-bg: #fffbeb;
+  --rad-glow: rgba(217,119,6,.15);
+
+  --ok: #059669;
+  --ok-bg: #ecfdf5;
+  --ok-bd: #a7f3d0;
+  --nok: #dc2626;
+  --nok-bg: #fef2f2;
+  --nok-bd: #fecaca;
+
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --bd: #e2e8f0;
+  --tx: #0f172a;
+  --tx2: #475569;
+  --tx3: #94a3b8;
+  --slate: #f1f5f9;
+
+  --r: 20px;
+  --r-sm: 12px;
+  --f: 'Inter', system-ui, sans-serif;
+  --mono: ui-monospace, 'SF Mono', monospace;
+  --ease: cubic-bezier(.4,0,.2,1);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--f);background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
 
-.top-bar{height:3px;background:linear-gradient(90deg,var(--bio),var(--rad))}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-.hdr{background:var(--az);color:#fff;padding:14px 24px;text-align:center}
-.hdr-tit{font-size:17px;font-weight:700;letter-spacing:.3px}
-.hdr-sub{font-size:11px;opacity:.7;margin-top:2px}
+body {
+  font-family: var(--f);
+  background: var(--bg);
+  color: var(--tx);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
 
-.main{max-width:560px;width:100%;margin:0 auto;padding:24px 16px;flex:1}
+/* ===== TELAS ===== */
+.tela { display: none; flex: 1; flex-direction: column; }
+.tela.ativa { display: flex; animation: enter .4s var(--ease) both; }
+@keyframes enter { from { opacity: 0; transform: translateY(16px); } }
 
-/* Telas */
-.tela{display:none}
-.tela.ativa{display:block}
+/* ============================================================
+   TELA 1: HERO
+   ============================================================ */
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(160deg, #1e3a5f 0%, #2a5082 40%, #336699 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  top: -200px; right: -150px;
+  background: radial-gradient(circle, rgba(37,99,235,.12) 0%, transparent 65%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  width: 400px; height: 400px;
+  bottom: -100px; left: -100px;
+  background: radial-gradient(circle, rgba(217,119,6,.1) 0%, transparent 65%);
+  border-radius: 50%;
+  pointer-events: none;
+}
 
-/* Card generico */
-.card{background:var(--br);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:32px 24px;text-align:center;margin-bottom:16px}
-.card h2{font-size:18px;font-weight:700;color:var(--az);margin-bottom:4px}
-.card .desc{font-size:13px;color:var(--mt);margin-bottom:24px;line-height:1.5}
-.card .icon{font-size:40px;margin-bottom:12px}
+.hero-top {
+  padding: 32px 24px 0;
+  text-align: center;
+  position: relative;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.7);
+  backdrop-filter: blur(8px);
+  margin-bottom: 20px;
+}
+.hero-badge svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
 
-/* Botoes de tipo */
-.tipo-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
-.tipo-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 12px;border:2px solid var(--bd);border-radius:var(--r);background:var(--br);cursor:pointer;transition:.2s;text-decoration:none;color:inherit}
-.tipo-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
-.tipo-btn .tipo-icon{font-size:32px}
-.tipo-btn .tipo-nome{font-size:13px;font-weight:700;line-height:1.3;text-align:center}
-.tipo-btn .tipo-desc{font-size:11px;color:var(--mt);line-height:1.3;text-align:center}
-.tipo-btn.bio{border-color:var(--bioc)}
-.tipo-btn.bio:hover{border-color:var(--bio);background:var(--bioc)}
-.tipo-btn.rad{border-color:var(--radc)}
-.tipo-btn.rad:hover{border-color:var(--rad);background:var(--radc)}
+.hero h1 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.hero p {
+  font-size: 15px;
+  color: rgba(255,255,255,.55);
+  max-width: 320px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
 
-/* Form */
-.field{margin-bottom:16px;text-align:left}
-.field label{display:block;font-size:12px;font-weight:600;color:var(--az);margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px}
-.field input{width:100%;padding:10px 14px;border:1px solid var(--bd);border-radius:var(--r);font-family:var(--f);font-size:14px;transition:.2s}
-.field input:focus{outline:none;border-color:var(--bio);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-.field input.mono{font-family:var(--m)}
+.hero-cards {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  padding: 32px 20px;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border:none;border-radius:var(--r);background:var(--az);color:#fff;font-family:var(--f);font-size:14px;font-weight:600;cursor:pointer;transition:.2s;margin-top:8px}
-.btn:hover{background:var(--azm)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn-outline{background:transparent;border:1px solid var(--bd);color:var(--az);margin-top:12px}
-.btn-outline:hover{background:var(--azc)}
+.hero-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 24px;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all .3s var(--ease);
+  backdrop-filter: blur(12px);
+  text-decoration: none;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12);
+}
+.hero-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity .3s var(--ease);
+}
+.hero-card.bio::after { background: var(--bio-g); }
+.hero-card.rad::after { background: var(--rad-g); }
 
-.erro{background:var(--vrc);color:var(--vr);border:1px solid #f5c6c3;border-radius:var(--r);padding:10px 14px;font-size:13px;margin-top:16px;display:none}
+.hero-card:hover {
+  transform: translateX(6px);
+  background: rgba(255,255,255,.2);
+  border-color: rgba(255,255,255,.3);
+  box-shadow: 0 6px 24px rgba(0,0,0,.18);
+}
+.hero-card:hover::after { opacity: .12; }
+.hero-card:active { transform: translateX(3px); }
 
-/* Tipo badge no login */
-.tipo-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:16px}
-.tipo-badge.bio{background:var(--bioc);color:var(--bio)}
-.tipo-badge.rad{background:var(--radc);color:var(--rad)}
+.hc-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.hero-card.bio .hc-icon { background: rgba(37,99,235,.2); }
+.hero-card.rad .hc-icon { background: rgba(217,119,6,.2); }
+.hc-icon svg { width: 26px; height: 26px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.hero-card.bio .hc-icon svg { stroke: #60a5fa; }
+.hero-card.rad .hc-icon svg { stroke: #fbbf24; }
 
-/* Resultado header */
-.emp-header{border-radius:var(--r) var(--r) 0 0;padding:16px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:#fff}
-.emp-header.bio{background:var(--bio)}
-.emp-header.rad{background:var(--rad)}
-.emp-avatar{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;color:#fff}
-.emp-nome{font-size:16px;font-weight:700}
-.emp-meta{font-size:12px;opacity:.7}
-.btn-voltar{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 14px;border-radius:var(--r);cursor:pointer;font-family:var(--f);font-size:12px;margin-left:auto;transition:.2s}
-.btn-voltar:hover{background:rgba(255,255,255,.25)}
+.hc-text { position: relative; z-index: 1; flex: 1; }
+.hc-title { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+.hc-sub { font-size: 13px; color: rgba(255,255,255,.5); line-height: 1.4; }
 
-.resultado-body{background:var(--br);border:1px solid var(--bd);border-top:none;border-radius:0 0 var(--r) var(--r);box-shadow:var(--sh);padding:20px}
+.hc-arrow {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  transition: all .3s var(--ease);
+}
+.hero-card:hover .hc-arrow { background: rgba(255,255,255,.15); transform: translateX(4px); }
+.hc-arrow svg { width: 16px; height: 16px; fill: none; stroke: rgba(255,255,255,.6); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-.competencia-tag{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r);font-size:14px;font-weight:700;margin-bottom:16px}
-.competencia-tag.bio{background:var(--bioc);color:var(--bio)}
-.competencia-tag.rad{background:var(--radc);color:var(--rad)}
+.hero-footer {
+  padding: 16px 24px 24px;
+  text-align: center;
+  position: relative;
+}
+.hero-footer-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: rgba(255,255,255,.35);
+}
+.hero-footer-note svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.5; }
 
-/* Info rows */
-.info-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;border-bottom:1px solid #f3f4f6}
-.info-row:last-child{border-bottom:none}
-.info-row .lbl{color:var(--mt)}
-.info-row .val{font-weight:600;font-family:var(--m);font-size:13px}
+/* ============================================================
+   TELA 2: LOGIN
+   ============================================================ */
+.login-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.login-top {
+  padding: 20px 20px 24px;
+  text-align: center;
+}
+.login-top.bio { background: var(--bio-g); color: #fff; }
+.login-top.rad { background: var(--rad-g); color: #fff; }
 
-/* Indice visual */
-.indice-visual{margin-top:16px;padding:16px;background:#f9fafb;border-radius:var(--r)}
-.indice-titulo{font-size:11px;color:var(--mt);text-align:center;margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
-.indice-valor{font-size:36px;font-weight:700;text-align:center;line-height:1}
-.indice-valor.carac{color:var(--vd)}
-.indice-valor.nao-bio{color:var(--bio)}
-.indice-valor.nao-rad{color:var(--rad)}
-.indice-barra{height:12px;background:#e5e7eb;border-radius:6px;position:relative;overflow:hidden;margin-top:10px}
-.indice-fill{height:100%;border-radius:6px;transition:width .6s ease}
-.indice-fill.bio{background:var(--bio)}
-.indice-fill.rad{background:var(--rad)}
-.indice-fill.carac{background:var(--vd)}
-.indice-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--mt);margin-top:4px}
-.indice-limite{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--vd);z-index:1}
+.login-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.15);
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--f);
+  margin-bottom: 16px;
+  transition: all .2s var(--ease);
+  backdrop-filter: blur(4px);
+}
+.login-back:hover { background: rgba(255,255,255,.2); }
+.login-back svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* Grade visual de plantoes */
-.grade-section{margin-top:16px;padding:16px;background:#f9fafb;border-radius:var(--r)}
-.grade-titulo{font-size:11px;color:var(--mt);text-align:center;margin-bottom:10px;text-transform:uppercase;letter-spacing:.3px}
-.grade-container{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.grade-bloco{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;border:1px solid transparent}
-.grade-bloco.normal{background:#e5e7eb;color:var(--mt);border-color:#d1d5db}
-.grade-bloco.exposto-bio{background:var(--bio);color:#fff}
-.grade-bloco.exposto-rad{background:var(--rad);color:#fff}
-.grade-bloco.exposto-carac{background:var(--vd);color:#fff}
-.grade-legenda{display:flex;justify-content:center;gap:16px;margin-top:10px;font-size:11px;color:var(--mt)}
-.grade-legenda span{display:inline-flex;align-items:center;gap:4px}
-.grade-legenda .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+.login-tipo-label {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: .7;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 4px;
+}
+.login-tipo-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -.3px;
+}
 
-/* Resultado box */
-.resultado-box{padding:20px;border-radius:var(--r);text-align:center;margin-top:16px}
-.resultado-box.carac{background:var(--vc);border:1px solid #c6f0d0}
-.resultado-box.nao{background:#fee2e2;border:1px solid #f5c6c3}
-.resultado-titulo{font-size:16px;font-weight:700;margin-bottom:6px}
-.resultado-titulo.carac{color:var(--vd)}
-.resultado-titulo.nao{color:var(--vr)}
-.resultado-desc{font-size:13px;color:var(--tx);line-height:1.5}
+.login-form {
+  flex: 1;
+  max-width: 440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 28px 20px;
+}
+.login-form h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.login-form .sub {
+  font-size: 14px;
+  color: var(--tx2);
+  margin-bottom: 24px;
+}
 
-/* Loading */
-.loading{display:none;text-align:center;padding:20px;color:var(--mt)}
-.spinner{display:inline-block;width:20px;height:20px;border:3px solid var(--bd);border-top-color:var(--bio);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.field { margin-bottom: 18px; }
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tx);
+  margin-bottom: 6px;
+}
+.field input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--bd);
+  border-radius: var(--r-sm);
+  font-family: var(--f);
+  font-size: 15px;
+  transition: all .2s var(--ease);
+  background: var(--card);
+  color: var(--tx);
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--bio);
+  box-shadow: 0 0 0 4px var(--bio-glow);
+  background: #fff;
+}
+.field input.rad-focus:focus {
+  border-color: var(--rad);
+  box-shadow: 0 0 0 4px var(--rad-glow);
+}
+.field input.mono { font-family: var(--mono); letter-spacing: 1.5px; }
+.field input::placeholder { color: var(--tx3); }
+
+.btn-consultar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: var(--r-sm);
+  color: #fff;
+  font-family: var(--f);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .25s var(--ease);
+  margin-top: 6px;
+}
+.btn-consultar.bio { background: var(--bio); }
+.btn-consultar.bio:hover { background: #1d4ed8; box-shadow: 0 6px 20px rgba(37,99,235,.3); transform: translateY(-1px); }
+.btn-consultar.rad { background: var(--rad); }
+.btn-consultar.rad:hover { background: #b45309; box-shadow: 0 6px 20px rgba(217,119,6,.3); transform: translateY(-1px); }
+.btn-consultar:disabled { opacity: .4; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-consultar:active { transform: translateY(0); }
+.btn-consultar svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.erro {
+  background: var(--nok-bg);
+  color: var(--nok);
+  border: 1px solid var(--nok-bd);
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  font-size: 13px;
+  margin-top: 16px;
+  display: none;
+  line-height: 1.5;
+}
+
+.loading { display: none; text-align: center; padding: 28px; color: var(--tx3); }
+.spinner {
+  display: inline-block;
+  width: 28px; height: 28px;
+  border: 3px solid var(--bd);
+  border-top-color: var(--bio);
+  border-radius: 50%;
+  animation: spin .65s linear infinite;
+}
+.spinner.rad { border-top-color: var(--rad); }
+@keyframes spin { to { transform: rotate(360deg) } }
+
+/* ============================================================
+   TELA 3: RESULTADO
+   ============================================================ */
+.res-wrap { flex: 1; display: flex; flex-direction: column; }
+
+.res-top {
+  padding: 20px 24px 24px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.res-top::before {
+  content: '';
+  position: absolute;
+  width: 300px; height: 300px;
+  top: -120px; right: -80px;
+  background: radial-gradient(circle, rgba(255,255,255,.07) 0%, transparent 65%);
+  border-radius: 50%;
+}
+.res-top.bio { background: var(--bio-g); }
+.res-top.rad { background: var(--rad-g); }
+
+.res-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  position: relative;
+}
+.res-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.15);
+  color: #fff;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--f);
+  transition: all .2s var(--ease);
+  backdrop-filter: blur(4px);
+}
+.res-back:hover { background: rgba(255,255,255,.2); }
+.res-back svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.res-comp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  backdrop-filter: blur(4px);
+}
+
+.res-person {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+}
+.res-avatar {
+  width: 54px; height: 54px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.res-nome { font-size: 18px; font-weight: 800; letter-spacing: -.2px; }
+.res-meta { font-size: 13px; opacity: .6; margin-top: 2px; }
+
+/* Content area */
+.res-content {
+  flex: 1;
+  max-width: 520px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* Stat pills */
+.stat-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.stat-pill {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: var(--r-sm);
+  padding: 16px 12px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,.03);
+}
+.sp-val {
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.sp-val.bio { color: var(--bio); }
+.sp-val.rad { color: var(--rad); }
+.sp-val.muted { color: var(--tx); }
+.sp-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tx3);
+  margin-top: 6px;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  line-height: 1.3;
+}
+
+/* Gauge */
+.gauge-card {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  padding: 28px 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.03);
+}
+.gauge-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tx3);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 20px;
+}
+.gauge-svg { display: block; margin: 0 auto; }
+.gauge-big {
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  margin: 14px 0 2px;
+  line-height: 1;
+}
+.gauge-big.bio { color: var(--bio); }
+.gauge-big.rad { color: var(--rad); }
+.gauge-big.ok { color: var(--ok); }
+.gauge-hint {
+  font-size: 14px;
+  color: var(--tx3);
+  font-weight: 500;
+}
+.gauge-limit-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 14px;
+  padding: 5px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--nok);
+}
+.gauge-limit-tag svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+
+/* Grade (plantoes) */
+.grade-card {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.03);
+}
+.grade-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tx3);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.grade-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: center;
+}
+.g-blk {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  transition: transform .15s var(--ease);
+}
+.g-blk:hover { transform: scale(1.15); }
+.g-blk.off { background: var(--slate); color: var(--tx3); }
+.g-blk.on-bio { background: var(--bio); color: #fff; }
+.g-blk.on-rad { background: var(--rad); color: #fff; }
+.g-blk.on-ok { background: var(--ok); color: #fff; }
+
+.grade-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--tx2);
+  font-weight: 500;
+}
+.grade-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.gl-dot { width: 10px; height: 10px; border-radius: 4px; display: inline-block; }
+
+/* Resultado final */
+.verdict {
+  border-radius: var(--r);
+  text-align: center;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.verdict-banner {
+  padding: 28px 24px 20px;
+  color: #fff;
+  position: relative;
+}
+.verdict-banner.ok { background: linear-gradient(135deg, #047857, #059669, #10b981); }
+.verdict-banner.nok { background: linear-gradient(135deg, #b91c1c, #dc2626, #ef4444); }
+
+.verdict-icon {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  backdrop-filter: blur(8px);
+  border: 2px solid rgba(255,255,255,.3);
+}
+.verdict-icon svg { width: 30px; height: 30px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+.verdict-title {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -.2px;
+}
+
+.verdict-body {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-top: none;
+  padding: 24px;
+  border-radius: 0 0 var(--r) var(--r);
+}
+.verdict-text {
+  font-size: 15px;
+  color: var(--tx2);
+  line-height: 1.8;
+}
+.verdict-method {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--bd);
+  font-size: 12px;
+  color: var(--tx3);
+  line-height: 1.7;
+}
 
 /* Footer */
-.footer{text-align:center;font-size:11px;color:var(--mt);padding:16px;border-top:1px solid var(--bd);margin-top:auto;background:var(--br);line-height:1.6}
+.foot {
+  text-align: center;
+  font-size: 12px;
+  color: var(--tx3);
+  padding: 18px 16px;
+  border-top: 1px solid var(--bd);
+  background: var(--card);
+  line-height: 1.7;
+}
+.foot strong { color: var(--tx2); font-weight: 600; }
 
-/* Responsivo */
-@media(max-width:500px){
-  .main{padding:16px 12px}
-  .card{padding:24px 16px}
-  .tipo-grid{grid-template-columns:1fr}
-  .emp-header{flex-direction:column;text-align:center}
-  .btn-voltar{margin:8px auto 0}
-  .grade-bloco{width:28px;height:28px;font-size:9px}
+/* ===== RESPONSIVO ===== */
+@media (max-width: 500px) {
+  .hero h1 { font-size: 22px; }
+  .hero-cards { padding: 24px 16px; }
+  .hero-card { padding: 18px 16px; gap: 14px; }
+  .hc-icon { width: 44px; height: 44px; }
+  .hc-title { font-size: 15px; }
+  .res-top { padding: 16px 16px 20px; }
+  .res-person { gap: 12px; }
+  .res-avatar { width: 46px; height: 46px; font-size: 17px; }
+  .res-nome { font-size: 16px; }
+  .g-blk { width: 32px; height: 32px; font-size: 10px; }
+  .sp-val { font-size: 26px; }
+  .gauge-big { font-size: 40px; }
 }
 </style>
 </head>
 <body>
 
-<div class="top-bar"></div>
+<!-- ============================================================
+     TELA 1: HERO
+     ============================================================ -->
+<div class="tela ativa" id="telaTipo">
+  <div class="hero">
+    <div class="hero-top">
+      <div class="hero-badge">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        USOST-HUL / EBSERH
+      </div>
+      <h1>Consulta de Exposicao<br>Ocupacional</h1>
+      <p>Acesse o resultado da sua analise mensal de exposicao a agentes de risco.</p>
+    </div>
 
-<div class="hdr">
-  <div class="hdr-tit">Consulta de Exposicao Ocupacional</div>
-  <div class="hdr-sub">USOST-HUL/EBSERH &middot; Autoatendimento</div>
-</div>
-
-<div class="main">
-
-  <!-- TELA 1: ESCOLHA DO TIPO -->
-  <div class="tela ativa" id="telaTipo">
-    <div class="card">
-      <div class="icon">🔍</div>
-      <h2>O que deseja consultar?</h2>
-      <p class="desc">Selecione o tipo de analise que voce deseja visualizar.</p>
-
-      <div class="tipo-grid">
-        <div class="tipo-btn bio" onclick="escolherTipo('BIO')">
-          <div class="tipo-icon">🦠</div>
-          <div class="tipo-nome">Insalubridade<br>Grau Maximo</div>
-          <div class="tipo-desc">Exposicao habitual a pacientes com doencas infectocontagiosas (NR-15, Anexo 14)</div>
+    <div class="hero-cards">
+      <div class="hero-card bio" onclick="escolherTipo('BIO')">
+        <div class="hc-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4m-7.07-3.93l2.83-2.83m8.48-8.48l2.83-2.83M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83"/></svg>
         </div>
-        <div class="tipo-btn rad" onclick="escolherTipo('RAD')">
-          <div class="tipo-icon">☢️</div>
-          <div class="tipo-nome">Periculosidade<br>por Radiacao</div>
-          <div class="tipo-desc">Exposicao a radiacao ionizante por arco cirurgico (NR-16)</div>
+        <div class="hc-text">
+          <div class="hc-title">Insalubridade Grau Maximo</div>
+          <div class="hc-sub">Agentes biologicos &middot; NR-15, Anexo 14</div>
         </div>
+        <div class="hc-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+
+      <div class="hero-card rad" onclick="escolherTipo('RAD')">
+        <div class="hc-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 4.5A7.5 7.5 0 0 1 19.5 12h-3a4.5 4.5 0 0 0-4.5-4.5v-3z"/><path d="M4.5 12A7.5 7.5 0 0 1 12 4.5v3A4.5 4.5 0 0 0 7.5 12h-3z"/><path d="M12 19.5A7.5 7.5 0 0 1 4.5 12h3a4.5 4.5 0 0 0 4.5 4.5v3z"/><path d="M19.5 12A7.5 7.5 0 0 1 12 19.5v-3a4.5 4.5 0 0 0 4.5-4.5h3z"/></svg>
+        </div>
+        <div class="hc-text">
+          <div class="hc-title">Periculosidade por Radiacao</div>
+          <div class="hc-sub">Radiacao ionizante &middot; NR-16</div>
+        </div>
+        <div class="hc-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
       </div>
     </div>
 
-    <div style="text-align:center;font-size:11px;color:var(--mt);line-height:1.6">
-      Seus dados sao confidenciais e nao ficam armazenados no navegador.
+    <div class="hero-footer">
+      <div class="hero-footer-note">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Dados confidenciais. Nada e armazenado no navegador.
+      </div>
     </div>
   </div>
+</div>
 
-  <!-- TELA 2: LOGIN -->
-  <div class="tela" id="telaLogin">
-    <div class="card">
-      <div id="loginTipoBadge"></div>
-      <h2>Identifique-se</h2>
-      <p class="desc">Informe seu nome completo e SIAPE para acessar o resultado da sua ultima analise finalizada.</p>
+<!-- ============================================================
+     TELA 2: LOGIN
+     ============================================================ -->
+<div class="tela" id="telaLogin">
+  <div class="login-wrap">
+    <div class="login-top" id="loginTop">
+      <button class="login-back" onclick="voltarTipo()">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> Voltar
+      </button>
+      <div class="login-tipo-label" id="loginTipoLabel"></div>
+      <div class="login-tipo-title" id="loginTipoTitle"></div>
+    </div>
+
+    <div class="login-form">
+      <h3>Identifique-se</h3>
+      <p class="sub">Nome completo e SIAPE para acessar seu resultado.</p>
 
       <div class="field">
         <label>Nome completo</label>
@@ -211,116 +770,95 @@ body{font-family:var(--f);background:var(--bg);color:var(--tx);font-size:14px;li
         <input type="text" id="inputSiape" class="mono" placeholder="Ex: 3502826" maxlength="7" inputmode="numeric" autocomplete="off">
       </div>
 
-      <button class="btn" id="btnConsultar" onclick="consultar()">
-        Consultar
-      </button>
-
-      <button class="btn btn-outline" onclick="voltarTipo()">
-        &#8592; Voltar
+      <button class="btn-consultar" id="btnConsultar" onclick="consultar()">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Consultar resultado
       </button>
 
       <div class="loading" id="loginLoading">
-        <div class="spinner"></div>
-        <p style="margin-top:8px;font-size:12px">Carregando dados da planilha...</p>
+        <div class="spinner" id="loginSpinner"></div>
+        <p style="margin-top:12px;font-size:13px">Buscando seus dados...</p>
       </div>
 
       <div class="erro" id="msgErro"></div>
     </div>
   </div>
-
-  <!-- TELA 3: RESULTADO -->
-  <div class="tela" id="telaResultado">
-    <div id="empHeader" class="emp-header bio">
-      <div class="emp-avatar" id="empAvatar"></div>
-      <div>
-        <div class="emp-nome" id="empNome"></div>
-        <div class="emp-meta" id="empMeta"></div>
-      </div>
-      <button class="btn-voltar" onclick="novaConsulta()">&#8592; Nova consulta</button>
-    </div>
-    <div class="resultado-body">
-      <div id="conteudoResultado"></div>
-    </div>
-  </div>
-
 </div>
 
-<div class="footer">
-  Em caso de duvidas, entre em contato com a USOST-HUL pelo <b>Microsoft Teams</b>.<br>
+<!-- ============================================================
+     TELA 3: RESULTADO
+     ============================================================ -->
+<div class="tela" id="telaResultado">
+  <div class="res-wrap">
+    <div class="res-top" id="resTopo">
+      <div class="res-nav">
+        <button class="res-back" onclick="novaConsulta()">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> Nova consulta
+        </button>
+        <div class="res-comp-pill" id="resComp"></div>
+      </div>
+      <div class="res-person">
+        <div class="res-avatar" id="empAvatar"></div>
+        <div>
+          <div class="res-nome" id="empNome"></div>
+          <div class="res-meta" id="empMeta"></div>
+        </div>
+      </div>
+    </div>
+    <div class="res-content" id="conteudoResultado"></div>
+  </div>
+</div>
+
+<div class="foot">
+  Em caso de duvidas, entre em contato com a USOST-HUL pelo <strong>Microsoft Teams</strong>.<br>
   Unidade de Saude Ocupacional e Seguranca do Trabalho &middot; Hospital Universitario de Lagarto &middot; EBSERH
 </div>
 
 <script>
-/* ══════════════════════════════════════════════════════════════════
+/* ==================================================================
    CONFIGURACAO
-   ══════════════════════════════════════════════════════════════════ */
-
+   ================================================================== */
 var SHEET_ID = '1BAcopQ8Jacx4Q8ojBuU-2MpGH85NUKzi73xd6rmo2rQ';
 var LOG_URL = 'https://script.google.com/macros/s/AKfycbzRMnUXmDJGruGIphFWHUkONQNpVoJDKFCuaKu2t0X2YrPDagxSnq6NOpIonKSXyOGHRQ/exec';
 var MESES = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho',
              'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var DATA_BIO = [], DATA_RAD = [], CONTROLE = {}, LOADED = false, TIPO_SEL = '';
 
-/* Estado */
-var DATA_BIO = [];
-var DATA_RAD = [];
-var CONTROLE = {}; /* {BIO: {mes, ano}, RAD: {mes, ano}} */
-var LOADED = false;
-var TIPO_SEL = '';
-
-/* ══════════════════════════════════════════════════════════════════
-   GVIZ: Leitura via JSONP
-   ══════════════════════════════════════════════════════════════════ */
-
+/* ==================================================================
+   GVIZ
+   ================================================================== */
 var _gvizCbId = 0;
-
 function fetchGviz(sheetName){
   return new Promise(function(resolve, reject){
     var cbName = '_gviz_cb_' + (++_gvizCbId);
     var q = encodeURIComponent("SELECT * WHERE A IS NOT NULL");
     var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
               '/gviz/tq?tqx=responseHandler:' + cbName +
-              '&sheet=' + encodeURIComponent(sheetName) +
-              '&tq=' + q;
-
+              '&sheet=' + encodeURIComponent(sheetName) + '&tq=' + q;
     window[cbName] = function(json){
       delete window[cbName];
-      if(json.status === 'error'){
-        reject(new Error(json.errors ? json.errors[0].detailed_message : 'Erro gviz'));
-        return;
-      }
+      if(json.status === 'error'){ reject(new Error(json.errors ? json.errors[0].detailed_message : 'Erro gviz')); return; }
       var table = json.table;
       if(!table || !table.rows){ resolve([]); return; }
       var cols = table.cols.map(function(c){ return c.label || c.id; });
-      var rows = table.rows.map(function(r){
+      resolve(table.rows.map(function(r){
         var obj = {};
-        r.c.forEach(function(cell, i){
-          obj[cols[i]] = cell ? (cell.f || cell.v) : '';
-        });
+        r.c.forEach(function(cell, i){ obj[cols[i]] = cell ? (cell.f || cell.v) : ''; });
         return obj;
-      });
-      resolve(rows);
+      }));
     };
-
     var s = document.createElement('script');
     s.src = url;
-    s.onerror = function(){
-      delete window[cbName];
-      reject(new Error('Falha ao carregar aba ' + sheetName));
-    };
+    s.onerror = function(){ delete window[cbName]; reject(new Error('Falha ao carregar aba ' + sheetName)); };
     document.head.appendChild(s);
   });
 }
 
-/* ══════════════════════════════════════════════════════════════════
+/* ==================================================================
    NORMALIZACAO
-   ══════════════════════════════════════════════════════════════════ */
-
-function norm(s){
-  return String(s||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
-}
-
+   ================================================================== */
+function norm(s){ return String(s||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim(); }
 var MESES_NORM = MESES.map(function(m){ return norm(m); });
-
 function getMesIdx(mesStr){
   var n = norm(mesStr);
   for(var i = 0; i < MESES_NORM.length; i++){
@@ -329,114 +867,90 @@ function getMesIdx(mesStr){
   return -1;
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   CARREGAR DADOS + CONTROLE
-   ══════════════════════════════════════════════════════════════════ */
-
+/* ==================================================================
+   CARREGAR DADOS
+   ================================================================== */
 function carregarDados(){
-  /* CONSULTA_CONTROLE e opcional: se a aba nao existir, segue sem filtro */
-  var pBio = fetchGviz('EXP_BIO');
-  var pRad = fetchGviz('EXP_RAD');
-  var pCtrl = fetchGviz('CONSULTA_CONTROLE').catch(function(){ return []; });
-
-  return Promise.all([pBio, pRad, pCtrl]).then(function(results){
-
-    /* ── Controle de liberacao ── */
-    var ctrl = results[2] || [];
-    ctrl.forEach(function(row){
-      /* Normalizar nomes de coluna: aceitar TIPO/Tipo/tipo, ULTIMO_MES/Ultimo Mes etc */
-      var normRow = {};
-      Object.keys(row).forEach(function(k){ normRow[norm(k).replace(/\s+/g,'_')] = row[k]; });
-      var tipo = norm(normRow.TIPO || '');
-      var mesStr = normRow.ULTIMO_MES || normRow.MES || '';
-      var anoStr = normRow.ULTIMO_ANO || normRow.ANO || '';
-      if(tipo === 'BIO' || tipo === 'RAD'){
-        CONTROLE[tipo] = {
-          mes: getMesIdx(mesStr),
-          ano: parseInt(anoStr) || 0
-        };
-      }
+  return Promise.all([
+    fetchGviz('EXP_BIO'), fetchGviz('EXP_RAD'),
+    fetchGviz('CONSULTA_CONTROLE').catch(function(){ return []; })
+  ]).then(function(results){
+    (results[2]||[]).forEach(function(row){
+      var nr = {};
+      Object.keys(row).forEach(function(k){ nr[norm(k).replace(/\s+/g,'_')] = row[k]; });
+      var tipo = norm(nr.TIPO || '');
+      var mesStr = nr.ULTIMO_MES || nr.MES || '';
+      var anoStr = nr.ULTIMO_ANO || nr.ANO || '';
+      if(tipo === 'BIO' || tipo === 'RAD') CONTROLE[tipo] = { mes: getMesIdx(mesStr), ano: parseInt(anoStr)||0 };
     });
-
-    /* ── Bio: filtrar sujeira + respeitar controle ── */
     var reSEI = /^\d{5}\.\d{5,6}\/\d{4}-\d{2}$/;
     DATA_BIO = results[0].filter(function(r){
-      var nome = String(r.NOME || '').trim();
-      if(!nome) return false;
-      if(reSEI.test(nome)) return false;
-      if(!/[a-zA-ZÀ-ÿ]/.test(nome)) return false;
-      var siape = String(r.SIAPE || '').replace(/\D/g,'');
+      var nome = String(r.NOME||'').trim();
+      if(!nome || reSEI.test(nome) || !/[a-zA-ZÀ-ÿ]/.test(nome)) return false;
+      var siape = String(r.SIAPE||'').replace(/\D/g,'');
       if(siape.length > 0 && siape.length < 6) return false;
       if(nome.split(/\s+/).length === 1 && nome === nome.toUpperCase() && siape.length < 7) return false;
-
-      /* Respeitar controle: so mostrar ate o mes liberado */
       if(CONTROLE.BIO){
-        var regAno = parseInt(r.ANO) || 0;
-        var regMes = getMesIdx(r.MES);
-        if(regAno > CONTROLE.BIO.ano) return false;
-        if(regAno === CONTROLE.BIO.ano && regMes > CONTROLE.BIO.mes) return false;
+        if((parseInt(r.ANO)||0) > CONTROLE.BIO.ano) return false;
+        if((parseInt(r.ANO)||0) === CONTROLE.BIO.ano && getMesIdx(r.MES) > CONTROLE.BIO.mes) return false;
       }
       return true;
     });
-
-    /* ── Rad: respeitar controle ── */
     DATA_RAD = results[1].filter(function(r){
       if(CONTROLE.RAD){
-        var regAno = parseInt(r.ANO) || 0;
-        var regMes = getMesIdx(r.MES);
-        if(regAno > CONTROLE.RAD.ano) return false;
-        if(regAno === CONTROLE.RAD.ano && regMes > CONTROLE.RAD.mes) return false;
+        if((parseInt(r.ANO)||0) > CONTROLE.RAD.ano) return false;
+        if((parseInt(r.ANO)||0) === CONTROLE.RAD.ano && getMesIdx(r.MES) > CONTROLE.RAD.mes) return false;
       }
       return true;
     });
-
     LOADED = true;
   });
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   LOG DE ACESSO
-   ══════════════════════════════════════════════════════════════════ */
-
+/* ==================================================================
+   LOG
+   ================================================================== */
 function registrarAcesso(nome, siape, tipo, mes, ano, resultado){
   try {
-    var payload = JSON.stringify({
-      nome: nome,
-      siape: siape,
-      tipo: tipo,
-      mes: mes,
-      ano: ano,
-      resultado: resultado
-    });
-    if(navigator.sendBeacon){
-      var blob = new Blob([payload], {type: 'text/plain'});
-      navigator.sendBeacon(LOG_URL, blob);
-    } else {
-      var xhr = new XMLHttpRequest();
-      xhr.open('POST', LOG_URL, true);
-      xhr.setRequestHeader('Content-Type', 'text/plain');
-      xhr.send(payload);
-    }
+    var p = JSON.stringify({nome:nome,siape:siape,tipo:tipo,mes:mes,ano:ano,resultado:resultado});
+    if(navigator.sendBeacon) navigator.sendBeacon(LOG_URL, new Blob([p],{type:'text/plain'}));
+    else { var x = new XMLHttpRequest(); x.open('POST',LOG_URL,true); x.setRequestHeader('Content-Type','text/plain'); x.send(p); }
   } catch(e){}
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   NAVEGACAO ENTRE TELAS
-   ══════════════════════════════════════════════════════════════════ */
-
+/* ==================================================================
+   NAVEGACAO
+   ================================================================== */
 function mostrarTela(id){
   document.querySelectorAll('.tela').forEach(function(t){ t.classList.remove('ativa'); });
   document.getElementById(id).classList.add('ativa');
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function escolherTipo(tipo){
   TIPO_SEL = tipo;
-  var badge = document.getElementById('loginTipoBadge');
+  var top = document.getElementById('loginTop');
+  var lbl = document.getElementById('loginTipoLabel');
+  var ttl = document.getElementById('loginTipoTitle');
+  var btn = document.getElementById('btnConsultar');
+  var spn = document.getElementById('loginSpinner');
+
+  top.className = 'login-top ' + tipo.toLowerCase();
+  btn.className = 'btn-consultar ' + tipo.toLowerCase();
+
   if(tipo === 'BIO'){
-    badge.innerHTML = '<span class="tipo-badge bio">🦠 Insalubridade &middot; Exposicao Biologica</span>';
+    lbl.textContent = 'Insalubridade';
+    ttl.textContent = 'Exposicao Biologica';
   } else {
-    badge.innerHTML = '<span class="tipo-badge rad">☢️ Periculosidade &middot; Radiacao Ionizante</span>';
+    lbl.textContent = 'Periculosidade';
+    ttl.textContent = 'Radiacao Ionizante';
+    spn.classList.add('rad');
   }
+
+  /* Focus color */
+  var inputs = document.querySelectorAll('.login-form input');
+  inputs.forEach(function(el){ el.classList.toggle('rad-focus', tipo === 'RAD'); });
+
   document.getElementById('inputNome').value = '';
   document.getElementById('inputSiape').value = '';
   document.getElementById('msgErro').style.display = 'none';
@@ -447,26 +961,17 @@ function escolherTipo(tipo){
 function voltarTipo(){ mostrarTela('telaTipo'); }
 function novaConsulta(){ mostrarTela('telaTipo'); }
 
-/* ══════════════════════════════════════════════════════════════════
+/* ==================================================================
    CONSULTAR
-   ══════════════════════════════════════════════════════════════════ */
-
+   ================================================================== */
 function consultar(){
   var nome = document.getElementById('inputNome').value.trim();
   var siape = document.getElementById('inputSiape').value.trim().replace(/\D/g,'');
   var erroEl = document.getElementById('msgErro');
   erroEl.style.display = 'none';
 
-  if(!nome || nome.length < 3){
-    erroEl.textContent = 'Informe seu nome completo.';
-    erroEl.style.display = 'block';
-    return;
-  }
-  if(!siape || siape.length < 6){
-    erroEl.textContent = 'Informe um SIAPE valido (7 digitos).';
-    erroEl.style.display = 'block';
-    return;
-  }
+  if(!nome || nome.length < 3){ erroEl.textContent = 'Informe seu nome completo.'; erroEl.style.display = 'block'; return; }
+  if(!siape || siape.length < 6){ erroEl.textContent = 'Informe um SIAPE valido (7 digitos).'; erroEl.style.display = 'block'; return; }
 
   var btnEl = document.getElementById('btnConsultar');
   var loadEl = document.getElementById('loginLoading');
@@ -476,28 +981,22 @@ function consultar(){
   var prosseguir = function(){
     var nomeN = norm(nome);
     var dados = TIPO_SEL === 'BIO' ? DATA_BIO : DATA_RAD;
-
-    /* EXP_BIO usa SIAPE, EXP_RAD usa MATRICULA */
     var campoId = TIPO_SEL === 'BIO' ? 'SIAPE' : 'MATRICULA';
 
-    /* Buscar registros: ID exato + nome contem */
     var registros = dados.filter(function(r){
-      var id = String(r[campoId] || '').replace(/\D/g,'');
-      if(id !== siape) return false;
-      return norm(r.NOME).indexOf(nomeN) !== -1;
+      var id = String(r[campoId]||'').replace(/\D/g,'');
+      return id === siape && norm(r.NOME).indexOf(nomeN) !== -1;
     });
 
-    /* Fallback: primeiro + ultimo nome */
     if(registros.length === 0){
       var partes = nomeN.split(/\s+/);
       if(partes.length >= 2){
-        var primeiro = partes[0];
-        var ultimo = partes[partes.length - 1];
+        var pri = partes[0], ult = partes[partes.length-1];
         registros = dados.filter(function(r){
-          var id = String(r[campoId] || '').replace(/\D/g,'');
+          var id = String(r[campoId]||'').replace(/\D/g,'');
           if(id !== siape) return false;
           var n = norm(r.NOME);
-          return n.indexOf(primeiro) !== -1 && n.indexOf(ultimo) !== -1;
+          return n.indexOf(pri) !== -1 && n.indexOf(ult) !== -1;
         });
       }
     }
@@ -506,216 +1005,168 @@ function consultar(){
     loadEl.style.display = 'none';
 
     if(registros.length === 0){
-      erroEl.textContent = 'Nenhum registro encontrado. Verifique se o nome e SIAPE estao corretos e se voce possui analise do tipo selecionado.';
+      erroEl.textContent = 'Nenhum registro encontrado. Verifique nome e SIAPE, e se voce possui analise do tipo selecionado.';
       erroEl.style.display = 'block';
       return;
     }
 
-    /* Pegar o registro mais recente (ultimo ano + ultimo mes) */
     registros.sort(function(a,b){
-      var anoA = parseInt(a.ANO) || 0, anoB = parseInt(b.ANO) || 0;
-      if(anoA !== anoB) return anoB - anoA;
-      return getMesIdx(b.MES) - getMesIdx(a.MES);
+      var d = (parseInt(b.ANO)||0) - (parseInt(a.ANO)||0);
+      return d !== 0 ? d : getMesIdx(b.MES) - getMesIdx(a.MES);
     });
-
-    var ultimo = registros[0];
-    mostrarResultado(ultimo);
+    mostrarResultado(registros[0]);
   };
 
-  if(!LOADED){
-    carregarDados().then(prosseguir).catch(function(err){
-      btnEl.disabled = false;
-      loadEl.style.display = 'none';
-      erroEl.textContent = 'Erro ao carregar dados: ' + err.message;
-      erroEl.style.display = 'block';
-    });
-  } else {
-    prosseguir();
-  }
+  if(!LOADED) carregarDados().then(prosseguir).catch(function(err){ btnEl.disabled=false; loadEl.style.display='none'; erroEl.textContent='Erro: '+err.message; erroEl.style.display='block'; });
+  else prosseguir();
 }
 
-/* Enter para consultar */
-document.getElementById('inputNome').addEventListener('keydown', function(e){ if(e.key === 'Enter') consultar(); });
-document.getElementById('inputSiape').addEventListener('keydown', function(e){ if(e.key === 'Enter') consultar(); });
+document.getElementById('inputNome').addEventListener('keydown', function(e){ if(e.key==='Enter') consultar(); });
+document.getElementById('inputSiape').addEventListener('keydown', function(e){ if(e.key==='Enter') consultar(); });
 
-/* ══════════════════════════════════════════════════════════════════
+/* ==================================================================
    MOSTRAR RESULTADO
-   ══════════════════════════════════════════════════════════════════ */
-
+   ================================================================== */
 function mostrarResultado(reg){
   mostrarTela('telaResultado');
 
-  var empNome = String(reg.NOME || '').trim();
-  var empSiape = String(reg.SIAPE || reg.MATRICULA || '').trim();
-  var cargo = String(reg.CARGO || '').trim();
-
-  /* Header */
-  var headerEl = document.getElementById('empHeader');
-  headerEl.className = 'emp-header ' + (TIPO_SEL === 'BIO' ? 'bio' : 'rad');
-
-  var partes = empNome.split(/\s+/);
-  var iniciais = partes.length >= 2 ? partes[0][0] + partes[partes.length-1][0] : partes[0].substring(0,2);
-  document.getElementById('empAvatar').textContent = iniciais.toUpperCase();
-  document.getElementById('empNome').textContent = empNome;
-  document.getElementById('empMeta').innerHTML = 'SIAPE ' + empSiape + (cargo ? ' &middot; ' + cargo : '');
-
-  /* Conteudo */
+  var nome = String(reg.NOME||'').trim();
+  var siape = String(reg.SIAPE||reg.MATRICULA||'').trim();
+  var cargo = String(reg.CARGO||'').trim();
   var mesNome = MESES[getMesIdx(reg.MES)] || reg.MES;
   var ano = reg.ANO || '';
-  var html = '';
+  var t = TIPO_SEL.toLowerCase();
 
-  if(TIPO_SEL === 'BIO'){
-    html = renderBio(reg, mesNome, ano);
-  } else {
-    html = renderRad(reg, mesNome, ano);
-  }
+  document.getElementById('resTopo').className = 'res-top ' + t;
+  document.getElementById('resComp').innerHTML = mesNome + '/' + ano;
 
-  document.getElementById('conteudoResultado').innerHTML = html;
+  var partes = nome.split(/\s+/);
+  var ini = partes.length >= 2 ? partes[0][0]+partes[partes.length-1][0] : partes[0].substring(0,2);
+  document.getElementById('empAvatar').textContent = ini.toUpperCase();
+  document.getElementById('empNome').textContent = nome;
+  document.getElementById('empMeta').innerHTML = 'SIAPE ' + siape + (cargo ? ' &middot; ' + cargo : '');
 
-  /* Log de acesso */
-  registrarAcesso(empNome, empSiape, TIPO_SEL === 'BIO' ? 'BIOLOGICO' : 'RADIACAO', mesNome, ano, reg.RESULTADO || '');
+  document.getElementById('conteudoResultado').innerHTML =
+    TIPO_SEL === 'BIO' ? renderBio(reg, mesNome, ano) : renderRad(reg, mesNome, ano);
+
+  registrarAcesso(nome, siape, TIPO_SEL==='BIO'?'BIOLOGICO':'RADIACAO', mesNome, ano, reg.RESULTADO||'');
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   GRADE VISUAL DE PLANTOES
-   Mostra blocos coloridos: total de plantoes vs com exposicao
-   ══════════════════════════════════════════════════════════════════ */
+/* ==================================================================
+   SVG GAUGE
+   ================================================================== */
+function svgGauge(pct, limite, color, track){
+  var r=62, cx=72, cy=72, sw=11;
+  var circ = 2*Math.PI*r;
+  var angle = Math.min(pct/(limite*2), 1);
+  var dash = circ * angle;
+  var limA = limite/(limite*2);
+  var limDeg = (-90 + limA*360) * Math.PI/180;
+  var lx1=cx+(r-sw/2-3)*Math.cos(limDeg), ly1=cy+(r-sw/2-3)*Math.sin(limDeg);
+  var lx2=cx+(r+sw/2+3)*Math.cos(limDeg), ly2=cy+(r+sw/2+3)*Math.sin(limDeg);
 
-function renderGrade(total, expostos, tipo, carac){
-  total = parseInt(total) || 0;
-  expostos = parseInt(expostos) || 0;
-  if(total <= 0) return '';
-
-  var corClass = carac ? 'exposto-carac' : ('exposto-' + tipo.toLowerCase());
-  var labelExp = tipo === 'BIO' ? 'Com exposicao' : 'Com radiacao';
-  var labelNorm = tipo === 'BIO' ? 'Sem exposicao' : 'Sem radiacao';
-
-  var h = '<div class="grade-section">';
-  h += '<div class="grade-titulo">Visualizacao dos Plantoes do Mes</div>';
-  h += '<div class="grade-container">';
-
-  for(var i = 1; i <= total; i++){
-    if(i <= expostos){
-      h += '<div class="grade-bloco ' + corClass + '">' + i + '</div>';
-    } else {
-      h += '<div class="grade-bloco normal">' + i + '</div>';
-    }
-  }
-  h += '</div>';
-
-  h += '<div class="grade-legenda">';
-  h += '<span><span class="dot" style="background:' + (carac ? 'var(--vr)' : (tipo === 'BIO' ? 'var(--bio)' : 'var(--rad)')) + '"></span> ' + labelExp + ' (' + expostos + ')</span>';
-  h += '<span><span class="dot" style="background:#e5e7eb"></span> ' + labelNorm + ' (' + (total - expostos) + ')</span>';
-  h += '</div>';
-  h += '</div>';
-
-  return h;
+  return '<svg class="gauge-svg" width="144" height="144" viewBox="0 0 144 144">'
+    +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+track+'" stroke-width="'+sw+'" stroke-linecap="round" transform="rotate(-90 '+cx+' '+cy+')"/>'
+    +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-dasharray="'+dash+' '+circ+'" transform="rotate(-90 '+cx+' '+cy+')" style="transition:stroke-dasharray .8s cubic-bezier(.4,0,.2,1)"/>'
+    +'<line x1="'+lx1+'" y1="'+ly1+'" x2="'+lx2+'" y2="'+ly2+'" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round"/>'
+    +'</svg>';
 }
 
-/* ══════════════════════════════════════════════════════════════════
+/* ==================================================================
+   GRADE
+   ================================================================== */
+function renderGrade(total, exp, tipo, carac){
+  total=parseInt(total)||0; exp=parseInt(exp)||0;
+  if(total<=0) return '';
+  var cls = carac ? 'on-ok' : ('on-'+tipo.toLowerCase());
+  var le = tipo==='BIO' ? 'Com exposicao' : 'Com radiacao';
+  var ln = tipo==='BIO' ? 'Sem exposicao' : 'Sem radiacao';
+  var dc = carac ? 'var(--ok)' : (tipo==='BIO' ? 'var(--bio)' : 'var(--rad)');
+
+  var h = '<div class="grade-card"><div class="grade-label">Plantoes do Mes</div><div class="grade-grid">';
+  for(var i=1;i<=total;i++) h += '<div class="g-blk '+(i<=exp?cls:'off')+'">'+i+'</div>';
+  h += '</div><div class="grade-legend">';
+  h += '<span><span class="gl-dot" style="background:'+dc+'"></span> '+le+' ('+exp+')</span>';
+  h += '<span><span class="gl-dot" style="background:var(--slate)"></span> '+ln+' ('+(total-exp)+')</span>';
+  return h + '</div></div>';
+}
+
+/* ==================================================================
    RENDER BIO
-   Colunas: ANO, MES, SIAPE, NOME, CARGO, PLANTAO_INF, PLANTAO,
-            INDICE_PCT, RESULTADO
-   ══════════════════════════════════════════════════════════════════ */
-
+   ================================================================== */
 function renderBio(r, mesNome, ano){
-  var pct = parseFloat(String(r.INDICE_PCT || '0').replace('%','')) || 0;
-  var carac = String(r.RESULTADO || '').indexOf('CARACTERIZADA') !== -1 && String(r.RESULTADO || '').indexOf('NAO') === -1;
-  var pli = parseInt(r.PLANTAO_INF) || 0;
-  var plt = parseInt(r.PLANTAO) || 0;
+  var pct = parseFloat(String(r.INDICE_PCT||'0').replace('%',''))||0;
+  var carac = String(r.RESULTADO||'').indexOf('CARACTERIZADA')!==-1 && String(r.RESULTADO||'').indexOf('NAO')===-1;
+  var pli = parseInt(r.PLANTAO_INF)||0, plt = parseInt(r.PLANTAO)||0;
+  if(pct===0 && plt>0 && pli>0) pct = Math.round(pli/plt*100);
 
-  /* Se INDICE_PCT veio zerado mas temos PLI/PLT, recalcular */
-  if(pct === 0 && plt > 0 && pli > 0){
-    pct = Math.round(pli / plt * 100);
-  }
-
+  var gc = carac ? '#059669' : '#2563eb', gt = carac ? '#d1fae5' : '#dbeafe', pc = carac ? 'ok' : 'bio';
   var h = '';
-  h += '<div class="competencia-tag bio">📅 Competencia: <b>' + mesNome + '/' + ano + '</b></div>';
-  h += '<div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--az)">Exposicao Biologica (Infectocontagiosas)</div>';
-
-  h += '<div class="info-row"><span class="lbl">Plantoes com exposicao a pacientes infectocontagiosos</span><span class="val">' + pli + '</span></div>';
-  h += '<div class="info-row"><span class="lbl">Total de plantoes realizados no mes</span><span class="val">' + plt + '</span></div>';
-
-  /* Grade visual */
+  h += '<div class="stat-row">';
+  h += '<div class="stat-pill"><div class="sp-val bio">'+pli+'</div><div class="sp-lbl">Plantoes com<br>exposicao</div></div>';
+  h += '<div class="stat-pill"><div class="sp-val muted">'+plt+'</div><div class="sp-lbl">Total de<br>plantoes</div></div>';
+  h += '</div>';
   h += renderGrade(plt, pli, 'BIO', carac);
+  h += '<div class="gauge-card"><div class="gauge-label">Indice de Exposicao (PLI / PLT)</div>';
+  h += svgGauge(pct, 50, gc, gt);
+  h += '<div class="gauge-big '+pc+'">'+pct+'%</div>';
+  h += '<div class="gauge-hint">de exposicao no periodo</div>';
+  h += '<div class="gauge-limit-tag"><svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg> Limite: 50%</div></div>';
 
-  /* Indice */
-  h += '<div class="indice-visual">';
-  h += '<div class="indice-titulo">Indice de Exposicao (PLI / PLT)</div>';
-  h += '<div class="indice-valor ' + (carac ? 'carac' : 'nao-bio') + '">' + pct + '%</div>';
-  h += '<div class="indice-barra"><div class="indice-fill ' + (carac ? 'carac' : 'bio') + '" style="width:' + Math.min(pct, 100) + '%"></div><div class="indice-limite" style="left:50%"></div></div>';
-  h += '<div class="indice-meta"><span>0%</span><span style="color:var(--vr);font-weight:600">&#9650; Limite: 50%</span><span>100%</span></div>';
-  h += '</div>';
-
-  /* Resultado */
   if(carac){
-    h += '<div class="resultado-box carac">';
-    h += '<div class="resultado-titulo carac">INSALUBRIDADE CARACTERIZADA</div>';
-    h += '<div class="resultado-desc">Seu indice de exposicao atingiu ou ultrapassou <b>50%</b>, o que caracteriza <b>insalubridade de grau maximo</b> conforme NR-15, Anexo 14.<br><br>Voce tem direito ao <b>adicional de insalubridade (40%)</b> referente a esta competencia.<br><br><span style="font-size:11px;color:var(--mt)">Resultado obtido por metodologia tecnica da USOST-HUL, fundamentada nos criterios da NR-15, Anexo 14, e no POP de Avaliacao de Risco Ocupacional.</span></div>';
-    h += '</div>';
+    h += '<div class="verdict"><div class="verdict-banner ok">';
+    h += '<div class="verdict-icon"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>';
+    h += '<div class="verdict-title">INSALUBRIDADE CARACTERIZADA</div></div>';
+    h += '<div class="verdict-body"><div class="verdict-text">Seu indice de exposicao atingiu ou ultrapassou <b>50%</b>, o que caracteriza <b>insalubridade de grau maximo</b> conforme NR-15, Anexo 14.<br><br>Voce tem direito ao <b>adicional de insalubridade (40%)</b> referente a esta competencia.</div>';
+    h += '<div class="verdict-method">Resultado obtido por metodologia tecnica da USOST-HUL, fundamentada nos criterios da NR-15, Anexo 14, e no POP de Avaliacao de Risco Ocupacional.</div></div></div>';
   } else {
-    h += '<div class="resultado-box nao">';
-    h += '<div class="resultado-titulo nao">INSALUBRIDADE NAO CARACTERIZADA</div>';
-    h += '<div class="resultado-desc">Seu indice de exposicao ficou abaixo de <b>50%</b>. Nao houve caracterizacao de insalubridade de grau maximo neste mes, conforme NR-15, Anexo 14.<br><br><span style="font-size:11px;color:var(--mt)">Resultado obtido por metodologia tecnica da USOST-HUL, fundamentada nos criterios da NR-15, Anexo 14, e no POP de Avaliacao de Risco Ocupacional.</span></div>';
-    h += '</div>';
+    h += '<div class="verdict"><div class="verdict-banner nok">';
+    h += '<div class="verdict-icon"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div>';
+    h += '<div class="verdict-title">INSALUBRIDADE NAO CARACTERIZADA</div></div>';
+    h += '<div class="verdict-body"><div class="verdict-text">Seu indice de exposicao ficou abaixo de <b>50%</b>. Nao houve caracterizacao de insalubridade de grau maximo neste mes, conforme NR-15, Anexo 14.</div>';
+    h += '<div class="verdict-method">Resultado obtido por metodologia tecnica da USOST-HUL, fundamentada nos criterios da NR-15, Anexo 14, e no POP de Avaliacao de Risco Ocupacional.</div></div></div>';
   }
-
   return h;
 }
 
-/* ══════════════════════════════════════════════════════════════════
+/* ==================================================================
    RENDER RAD
-   Colunas: ANO, MES, MATRICULA, NOME, CARGO, CIRURGIAS,
-            DIAS_EXPOSICAO, PLANTAO_ESPERADO, INDICE_PCT, RESULTADO
-   ══════════════════════════════════════════════════════════════════ */
-
+   ================================================================== */
 function renderRad(r, mesNome, ano){
-  var pct = parseFloat(String(r.INDICE_PCT || '0').replace('%','')) || 0;
-  var carac = String(r.RESULTADO || '').indexOf('CARACTERIZADA') !== -1 && String(r.RESULTADO || '').indexOf('NAO') === -1;
-  var diasExp = parseInt(r.DIAS_EXPOSICAO) || 0;
-  var pltEsp = parseInt(r.PLANTAO_ESPERADO) || 0;
-  var cirurgias = parseInt(r.CIRURGIAS) || 0;
+  var pct = parseFloat(String(r.INDICE_PCT||'0').replace('%',''))||0;
+  var carac = String(r.RESULTADO||'').indexOf('CARACTERIZADA')!==-1 && String(r.RESULTADO||'').indexOf('NAO')===-1;
+  var diasExp=parseInt(r.DIAS_EXPOSICAO)||0, pltEsp=parseInt(r.PLANTAO_ESPERADO)||0, cir=parseInt(r.CIRURGIAS)||0;
+  if(pct===0 && pltEsp>0 && diasExp>0) pct = Math.round(diasExp/pltEsp*100);
 
-  /* Recalcular se necessario */
-  if(pct === 0 && pltEsp > 0 && diasExp > 0){
-    pct = Math.round(diasExp / pltEsp * 100);
-  }
-
+  var gc = carac ? '#059669' : '#d97706', gt = carac ? '#d1fae5' : '#fef3c7', pc = carac ? 'ok' : 'rad';
   var h = '';
-  h += '<div class="competencia-tag rad">📅 Competencia: <b>' + mesNome + '/' + ano + '</b></div>';
-  h += '<div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--rad)">Exposicao a Radiacao Ionizante (Arco Cirurgico)</div>';
-
-  h += '<div class="info-row"><span class="lbl">Cirurgias com arco cirurgico</span><span class="val">' + cirurgias + '</span></div>';
-  h += '<div class="info-row"><span class="lbl">Dias com exposicao a radiacao</span><span class="val">' + diasExp + '</span></div>';
-  h += '<div class="info-row"><span class="lbl">Plantao esperado no mes</span><span class="val">' + pltEsp + '</span></div>';
-
-  /* Grade visual */
-  h += renderGrade(pltEsp, diasExp, 'RAD', carac);
-
-  /* Indice */
-  h += '<div class="indice-visual">';
-  h += '<div class="indice-titulo">Indice de Exposicao (Dias / Plantao Esperado)</div>';
-  h += '<div class="indice-valor ' + (carac ? 'carac' : 'nao-rad') + '">' + pct + '%</div>';
-  h += '<div class="indice-barra"><div class="indice-fill ' + (carac ? 'carac' : 'rad') + '" style="width:' + Math.min(pct * 2, 100) + '%"></div><div class="indice-limite" style="left:50%"></div></div>';
-  h += '<div class="indice-meta"><span>0%</span><span style="color:var(--vr);font-weight:600">&#9650; Limite: 25%</span><span>50%+</span></div>';
+  h += '<div class="stat-row">';
+  h += '<div class="stat-pill"><div class="sp-val rad">'+cir+'</div><div class="sp-lbl">Cirurgias</div></div>';
+  h += '<div class="stat-pill"><div class="sp-val rad">'+diasExp+'</div><div class="sp-lbl">Dias<br>expostos</div></div>';
+  h += '<div class="stat-pill"><div class="sp-val muted">'+pltEsp+'</div><div class="sp-lbl">Plantao<br>esperado</div></div>';
   h += '</div>';
+  h += renderGrade(pltEsp, diasExp, 'RAD', carac);
+  h += '<div class="gauge-card"><div class="gauge-label">Indice de Exposicao (Dias / Plantao)</div>';
+  h += svgGauge(pct, 25, gc, gt);
+  h += '<div class="gauge-big '+pc+'">'+pct+'%</div>';
+  h += '<div class="gauge-hint">de exposicao no periodo</div>';
+  h += '<div class="gauge-limit-tag"><svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg> Limite: 25%</div></div>';
 
-  /* Resultado */
   if(carac){
-    h += '<div class="resultado-box carac">';
-    h += '<div class="resultado-titulo carac">PERICULOSIDADE CARACTERIZADA</div>';
-    h += '<div class="resultado-desc">Seu indice de exposicao atingiu ou ultrapassou <b>25%</b>, o que caracteriza <b>periculosidade</b> conforme NR-16.<br><br>Voce tem direito ao <b>adicional de periculosidade (30%)</b> referente a esta competencia.<br><br><span style="font-size:11px;color:var(--mt)">Resultado obtido por metodologia tecnica da USOST-HUL, fundamentada nos criterios da NR-16 e no POP de Avaliacao de Risco Ocupacional.</span></div>';
-    h += '</div>';
+    h += '<div class="verdict"><div class="verdict-banner ok">';
+    h += '<div class="verdict-icon"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>';
+    h += '<div class="verdict-title">PERICULOSIDADE CARACTERIZADA</div></div>';
+    h += '<div class="verdict-body"><div class="verdict-text">Seu indice de exposicao atingiu ou ultrapassou <b>25%</b>, o que caracteriza <b>periculosidade</b> conforme NR-16.<br><br>Voce tem direito ao <b>adicional de periculosidade (30%)</b> referente a esta competencia.</div>';
+    h += '<div class="verdict-method">Resultado obtido por metodologia tecnica da USOST-HUL, fundamentada nos criterios da NR-16 e no POP de Avaliacao de Risco Ocupacional.</div></div></div>';
   } else {
-    h += '<div class="resultado-box nao">';
-    h += '<div class="resultado-titulo nao">PERICULOSIDADE NAO CARACTERIZADA</div>';
-    h += '<div class="resultado-desc">Seu indice de exposicao ficou abaixo de <b>25%</b>. Nao houve caracterizacao de periculosidade neste mes, conforme NR-16.<br><br><span style="font-size:11px;color:var(--mt)">Resultado obtido por metodologia tecnica da USOST-HUL, fundamentada nos criterios da NR-16 e no POP de Avaliacao de Risco Ocupacional.</span></div>';
-    h += '</div>';
+    h += '<div class="verdict"><div class="verdict-banner nok">';
+    h += '<div class="verdict-icon"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div>';
+    h += '<div class="verdict-title">PERICULOSIDADE NAO CARACTERIZADA</div></div>';
+    h += '<div class="verdict-body"><div class="verdict-text">Seu indice de exposicao ficou abaixo de <b>25%</b>. Nao houve caracterizacao de periculosidade neste mes, conforme NR-16.</div>';
+    h += '<div class="verdict-method">Resultado obtido por metodologia tecnica da USOST-HUL, fundamentada nos criterios da NR-16 e no POP de Avaliacao de Risco Ocupacional.</div></div></div>';
   }
-
   return h;
 }
-
 </script>
 </body>
 </html>
