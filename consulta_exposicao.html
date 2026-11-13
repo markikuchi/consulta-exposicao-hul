@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<!--
+  Consulta Individual de Exposicao Ocupacional v3.0
+  Autoatendimento: empregado consulta sua analise mensal
+  Bio (NR-15 Anexo 14) + Radiacao Ionizante (NR-16)
+  Controle de liberacao via aba CONSULTA_CONTROLE
+  USOST · HU Lagarto · EBSERH
+  Novembro 2026
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta de Exposicao Ocupacional · USOST/HUL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --az: #1a2744; --azm: #1a3a6c; --azc: #e8f0fb;
+  --vr: #c0392b; --vrc: #fdf0ef;
+  --vd: #1a5c33; --vc: #eaf5ec;
+  --am: #d4a017; --amc: #fef9e7;
+  --bg: #f7f8fa; --bd: #dde1e7; --mt: #6b7280;
+  --tx: #1a1d23; --br: #ffffff;
+  --r: 10px; --sh: 0 1px 4px rgba(0,0,0,0.07);
+  --f: 'IBM Plex Sans',sans-serif; --m: 'IBM Plex Mono',monospace;
+  --rad: #8e44ad; --radc: #f5eef8;
+  --bio: #2563eb; --bioc: #eff6ff;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--f);background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
+
+.top-bar{height:3px;background:linear-gradient(90deg,var(--bio),var(--rad))}
+
+.hdr{background:var(--az);color:#fff;padding:14px 24px;text-align:center}
+.hdr-tit{font-size:17px;font-weight:700;letter-spacing:.3px}
+.hdr-sub{font-size:11px;opacity:.7;margin-top:2px}
+
+.main{max-width:560px;width:100%;margin:0 auto;padding:24px 16px;flex:1}
+
+/* Telas */
+.tela{display:none}
+.tela.ativa{display:block}
+
+/* Card generico */
+.card{background:var(--br);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:32px 24px;text-align:center;margin-bottom:16px}
+.card h2{font-size:18px;font-weight:700;color:var(--az);margin-bottom:4px}
+.card .desc{font-size:13px;color:var(--mt);margin-bottom:24px;line-height:1.5}
+.card .icon{font-size:40px;margin-bottom:12px}
+
+/* Botoes de tipo */
+.tipo-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.tipo-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 12px;border:2px solid var(--bd);border-radius:var(--r);background:var(--br);cursor:pointer;transition:.2s;text-decoration:none;color:inherit}
+.tipo-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.tipo-btn .tipo-icon{font-size:32px}
+.tipo-btn .tipo-nome{font-size:13px;font-weight:700;line-height:1.3;text-align:center}
+.tipo-btn .tipo-desc{font-size:11px;color:var(--mt);line-height:1.3;text-align:center}
+.tipo-btn.bio{border-color:var(--bioc)}
+.tipo-btn.bio:hover{border-color:var(--bio);background:var(--bioc)}
+.tipo-btn.rad{border-color:var(--radc)}
+.tipo-btn.rad:hover{border-color:var(--rad);background:var(--radc)}
+
+/* Form */
+.field{margin-bottom:16px;text-align:left}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--az);margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px}
+.field input{width:100%;padding:10px 14px;border:1px solid var(--bd);border-radius:var(--r);font-family:var(--f);font-size:14px;transition:.2s}
+.field input:focus{outline:none;border-color:var(--bio);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.field input.mono{font-family:var(--m)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border:none;border-radius:var(--r);background:var(--az);color:#fff;font-family:var(--f);font-size:14px;font-weight:600;cursor:pointer;transition:.2s;margin-top:8px}
+.btn:hover{background:var(--azm)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-outline{background:transparent;border:1px solid var(--bd);color:var(--az);margin-top:12px}
+.btn-outline:hover{background:var(--azc)}
+
+.erro{background:var(--vrc);color:var(--vr);border:1px solid #f5c6c3;border-radius:var(--r);padding:10px 14px;font-size:13px;margin-top:16px;display:none}
+
+/* Tipo badge no login */
+.tipo-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:16px}
+.tipo-badge.bio{background:var(--bioc);color:var(--bio)}
+.tipo-badge.rad{background:var(--radc);color:var(--rad)}
+
+/* Resultado header */
+.emp-header{border-radius:var(--r) var(--r) 0 0;padding:16px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:#fff}
+.emp-header.bio{background:var(--bio)}
+.emp-header.rad{background:var(--rad)}
+.emp-avatar{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;color:#fff}
+.emp-nome{font-size:16px;font-weight:700}
+.emp-meta{font-size:12px;opacity:.7}
+.btn-voltar{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 14px;border-radius:var(--r);cursor:pointer;font-family:var(--f);font-size:12px;margin-left:auto;transition:.2s}
+.btn-voltar:hover{background:rgba(255,255,255,.25)}
+
+.resultado-body{background:var(--br);border:1px solid var(--bd);border-top:none;border-radius:0 0 var(--r) var(--r);box-shadow:var(--sh);padding:20px}
+
+.competencia-tag{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r);font-size:14px;font-weight:700;margin-bottom:16px}
+.competencia-tag.bio{background:var(--bioc);color:var(--bio)}
+.competencia-tag.rad{background:var(--radc);color:var(--rad)}
+
+/* Info rows */
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;border-bottom:1px solid #f3f4f6}
+.info-row:last-child{border-bottom:none}
+.info-row .lbl{color:var(--mt)}
+.info-row .val{font-weight:600;font-family:var(--m);font-size:13px}
+
+/* Indice visual */
+.indice-visual{margin-top:16px;padding:16px;background:#f9fafb;border-radius:var(--r)}
+.indice-titulo{font-size:11px;color:var(--mt);text-align:center;margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
+.indice-valor{font-size:36px;font-weight:700;text-align:center;line-height:1}
+.indice-valor.carac{color:var(--vd)}
+.indice-valor.nao-bio{color:var(--bio)}
+.indice-valor.nao-rad{color:var(--rad)}
+.indice-barra{height:12px;background:#e5e7eb;border-radius:6px;position:relative;overflow:hidden;margin-top:10px}
+.indice-fill{height:100%;border-radius:6px;transition:width .6s ease}
+.indice-fill.bio{background:var(--bio)}
+.indice-fill.rad{background:var(--rad)}
+.indice-fill.carac{background:var(--vd)}
+.indice-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--mt);margin-top:4px}
+.indice-limite{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--vd);z-index:1}
+
+/* Grade visual de plantoes */
+.grade-section{margin-top:16px;padding:16px;background:#f9fafb;border-radius:var(--r)}
+.grade-titulo{font-size:11px;color:var(--mt);text-align:center;margin-bottom:10px;text-transform:uppercase;letter-spacing:.3px}
+.grade-container{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.grade-bloco{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;border:1px solid transparent}
+.grade-bloco.normal{background:#e5e7eb;color:var(--mt);border-color:#d1d5db}
+.grade-bloco.exposto-bio{background:var(--bio);color:#fff}
+.grade-bloco.exposto-rad{background:var(--rad);color:#fff}
+.grade-bloco.exposto-carac{background:var(--vd);color:#fff}
+.grade-legenda{display:flex;justify-content:center;gap:16px;margin-top:10px;font-size:11px;color:var(--mt)}
+.grade-legenda span{display:inline-flex;align-items:center;gap:4px}
+.grade-legenda .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+/* Resultado box */
+.resultado-box{padding:20px;border-radius:var(--r);text-align:center;margin-top:16px}
+.resultado-box.carac{background:var(--vc);border:1px solid #c6f0d0}
+.resultado-box.nao{background:#fee2e2;border:1px solid #f5c6c3}
+.resultado-titulo{font-size:16px;font-weight:700;margin-bottom:6px}
+.resultado-titulo.carac{color:var(--vd)}
+.resultado-titulo.nao{color:var(--vr)}
+.resultado-desc{font-size:13px;color:var(--tx);line-height:1.5}
+
+/* Loading */
+.loading{display:none;text-align:center;padding:20px;color:var(--mt)}
+.spinner{display:inline-block;width:20px;height:20px;border:3px solid var(--bd);border-top-color:var(--bio);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Footer */
+.footer{text-align:center;font-size:11px;color:var(--mt);padding:16px;border-top:1px solid var(--bd);margin-top:auto;background:var(--br);line-height:1.6}
+
+/* Responsivo */
+@media(max-width:500px){
+  .main{padding:16px 12px}
+  .card{padding:24px 16px}
+  .tipo-grid{grid-template-columns:1fr}
+  .emp-header{flex-direction:column;text-align:center}
+  .btn-voltar{margin:8px auto 0}
+  .grade-bloco{width:28px;height:28px;font-size:9px}
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+
+<div class="hdr">
+  <div class="hdr-tit">Consulta de Exposicao Ocupacional</div>
+  <div class="hdr-sub">USOST-HUL/EBSERH &middot; Autoatendimento</div>
+</div>
+
+<div class="main">
+
+  <!-- TELA 1: ESCOLHA DO TIPO -->
+  <div class="tela ativa" id="telaTipo">
+    <div class="card">
+      <div class="icon">🔍</div>
+      <h2>O que deseja consultar?</h2>
+      <p class="desc">Selecione o tipo de analise que voce deseja visualizar.</p>
+
+      <div class="tipo-grid">
+        <div class="tipo-btn bio" onclick="escolherTipo('BIO')">
+          <div class="tipo-icon">🦠</div>
+          <div class="tipo-nome">Insalubridade<br>Grau Maximo</div>
+          <div class="tipo-desc">Exposicao habitual a pacientes com doencas infectocontagiosas (NR-15, Anexo 14)</div>
+        </div>
+        <div class="tipo-btn rad" onclick="escolherTipo('RAD')">
+          <div class="tipo-icon">☢️</div>
+          <div class="tipo-nome">Periculosidade<br>por Radiacao</div>
+          <div class="tipo-desc">Exposicao a radiacao ionizante por arco cirurgico (NR-16)</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;font-size:11px;color:var(--mt);line-height:1.6">
+      Seus dados sao confidenciais e nao ficam armazenados no navegador.
+    </div>
+  </div>
+
+  <!-- TELA 2: LOGIN -->
+  <div class="tela" id="telaLogin">
+    <div class="card">
+      <div id="loginTipoBadge"></div>
+      <h2>Identifique-se</h2>
+      <p class="desc">Informe seu nome completo e SIAPE para acessar o resultado da sua ultima analise finalizada.</p>
+
+      <div class="field">
+        <label>Nome completo</label>
+        <input type="text" id="inputNome" placeholder="Digite seu nome completo" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>SIAPE</label>
+        <input type="text" id="inputSiape" class="mono" placeholder="Ex: 3502826" maxlength="7" inputmode="numeric" autocomplete="off">
+      </div>
+
+      <button class="btn" id="btnConsultar" onclick="consultar()">
+        Consultar
+      </button>
+
+      <button class="btn btn-outline" onclick="voltarTipo()">
+        &#8592; Voltar
+      </button>
+
+      <div class="loading" id="loginLoading">
+        <div class="spinner"></div>
+        <p style="margin-top:8px;font-size:12px">Carregando dados da planilha...</p>
+      </div>
+
+      <div class="erro" id="msgErro"></div>
+    </div>
+  </div>
+
+  <!-- TELA 3: RESULTADO -->
+  <div class="tela" id="telaResultado">
+    <div id="empHeader" class="emp-header bio">
+      <div class="emp-avatar" id="empAvatar"></div>
+      <div>
+        <div class="emp-nome" id="empNome"></div>
+        <div class="emp-meta" id="empMeta"></div>
+      </div>
+      <button class="btn-voltar" onclick="novaConsulta()">&#8592; Nova consulta</button>
+    </div>
+    <div class="resultado-body">
+      <div id="conteudoResultado"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Em caso de duvidas, entre em contato com a USOST-HUL pelo <b>Microsoft Teams</b>.<br>
+  Unidade de Saude Ocupacional e Seguranca do Trabalho &middot; Hospital Universitario de Lagarto &middot; EBSERH
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   CONFIGURACAO
+   ══════════════════════════════════════════════════════════════════ */
+
+var SHEET_ID = '1BAcopQ8Jacx4Q8ojBuU-2MpGH85NUKzi73xd6rmo2rQ';
+var LOG_URL = 'https://script.google.com/macros/s/AKfycbzRMnUXmDJGruGIphFWHUkONQNpVoJDKFCuaKu2t0X2YrPDagxSnq6NOpIonKSXyOGHRQ/exec';
+var MESES = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho',
+             'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+/* Estado */
+var DATA_BIO = [];
+var DATA_RAD = [];
+var CONTROLE = {}; /* {BIO: {mes, ano}, RAD: {mes, ano}} */
+var LOADED = false;
+var TIPO_SEL = '';
+
+/* ══════════════════════════════════════════════════════════════════
+   GVIZ: Leitura via JSONP
+   ══════════════════════════════════════════════════════════════════ */
+
+var _gvizCbId = 0;
+
+function fetchGviz(sheetName){
+  return new Promise(function(resolve, reject){
+    var cbName = '_gviz_cb_' + (++_gvizCbId);
+    var q = encodeURIComponent("SELECT * WHERE A IS NOT NULL");
+    var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
+              '/gviz/tq?tqx=responseHandler:' + cbName +
+              '&sheet=' + encodeURIComponent(sheetName) +
+              '&tq=' + q;
+
+    window[cbName] = function(json){
+      delete window[cbName];
+      if(json.status === 'error'){
+        reject(new Error(json.errors ? json.errors[0].detailed_message : 'Erro gviz'));
+        return;
+      }
+      var table = json.table;
+      if(!table || !table.rows){ resolve([]); return; }
+      var cols = table.cols.map(function(c){ return c.label || c.id; });
+      var rows = table.rows.map(function(r){
+        var obj = {};
+        r.c.forEach(function(cell, i){
+          obj[cols[i]] = cell ? (cell.f || cell.v) : '';
+        });
+        return obj;
+      });
+      resolve(rows);
+    };
+
+    var s = document.createElement('script');
+    s.src = url;
+    s.onerror = function(){
+      delete window[cbName];
+      reject(new Error('Falha ao carregar aba ' + sheetName));
+    };
+    document.head.appendChild(s);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   NORMALIZACAO
+   ══════════════════════════════════════════════════════════════════ */
+
+function norm(s){
+  return String(s||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+}
+
+var MESES_NORM = MESES.map(function(m){ return norm(m); });
+
+function getMesIdx(mesStr){
+  var n = norm(mesStr);
+  for(var i = 0; i < MESES_NORM.length; i++){
+    if(n === MESES_NORM[i] || n.indexOf(MESES_NORM[i]) === 0 || MESES_NORM[i].indexOf(n) === 0) return i;
+  }
+  return -1;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   CARREGAR DADOS + CONTROLE
+   ══════════════════════════════════════════════════════════════════ */
+
+function carregarDados(){
+  /* CONSULTA_CONTROLE e opcional: se a aba nao existir, segue sem filtro */
+  var pBio = fetchGviz('EXP_BIO');
+  var pRad = fetchGviz('EXP_RAD');
+  var pCtrl = fetchGviz('CONSULTA_CONTROLE').catch(function(){ return []; });
+
+  return Promise.all([pBio, pRad, pCtrl]).then(function(results){
+
+    /* ── Controle de liberacao ── */
+    var ctrl = results[2] || [];
+    ctrl.forEach(function(row){
+      /* Normalizar nomes de coluna: aceitar TIPO/Tipo/tipo, ULTIMO_MES/Ultimo Mes etc */
+      var normRow = {};
+      Object.keys(row).forEach(function(k){ normRow[norm(k).replace(/\s+/g,'_')] = row[k]; });
+      var tipo = norm(normRow.TIPO || '');
+      var mesStr = normRow.ULTIMO_MES || normRow.MES || '';
+      var anoStr = normRow.ULTIMO_ANO || normRow.ANO || '';
+      if(tipo === 'BIO' || tipo === 'RAD'){
+        CONTROLE[tipo] = {
+          mes: getMesIdx(mesStr),
+          ano: parseInt(anoStr) || 0
+        };
+      }
+    });
+
+    /* ── Bio: filtrar sujeira + respeitar controle ── */
+    var reSEI = /^\d{5}\.\d{5,6}\/\d{4}-\d{2}$/;
+    DATA_BIO = results[0].filter(function(r){
+      var nome = String(r.NOME || '').trim();
+      if(!nome) return false;
+      if(reSEI.test(nome)) return false;
+      if(!/[a-zA-ZÀ-ÿ]/.test(nome)) return false;
+      var siape = String(r.SIAPE || '').replace(/\D/g,'');
+      if(siape.length > 0 && siape.length < 6) return false;
+      if(nome.split(/\s+/).length === 1 && nome === nome.toUpperCase() && siape.length < 7) return false;
+
+      /* Respeitar controle: so mostrar ate o mes liberado */
+      if(CONTROLE.BIO){
+        var regAno = parseInt(r.ANO) || 0;
+        var regMes = getMesIdx(r.MES);
+        if(regAno > CONTROLE.BIO.ano) return false;
+        if(regAno === CONTROLE.BIO.ano && regMes > CONTROLE.BIO.mes) return false;
+      }
+      return true;
+    });
+
+    /* ── Rad: respeitar controle ── */
+    DATA_RAD = results[1].filter(function(r){
+      if(CONTROLE.RAD){
+        var regAno = parseInt(r.ANO) || 0;
+        var regMes = getMesIdx(r.MES);
+        if(regAno > CONTROLE.RAD.ano) return false;
+        if(regAno === CONTROLE.RAD.ano && regMes > CONTROLE.RAD.mes) return false;
+      }
+      return true;
+    });
+
+    LOADED = true;
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LOG DE ACESSO
+   ══════════════════════════════════════════════════════════════════ */
+
+function registrarAcesso(nome, siape, tipo, mes, ano, resultado){
+  try {
+    var payload = JSON.stringify({
+      nome: nome,
+      siape: siape,
+      tipo: tipo,
+      mes: mes,
+      ano: ano,
+      resultado: resultado
+    });
+    if(navigator.sendBeacon){
+      var blob = new Blob([payload], {type: 'text/plain'});
+      navigator.sendBeacon(LOG_URL, blob);
+    } else {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', LOG_URL, true);
+      xhr.setRequestHeader('Content-Type', 'text/plain');
+      xhr.send(payload);
+    }
+  } catch(e){}
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   NAVEGACAO ENTRE TELAS
+   ══════════════════════════════════════════════════════════════════ */
+
+function mostrarTela(id){
+  document.querySelectorAll('.tela').forEach(function(t){ t.classList.remove('ativa'); });
+  document.getElementById(id).classList.add('ativa');
+}
+
+function escolherTipo(tipo){
+  TIPO_SEL = tipo;
+  var badge = document.getElementById('loginTipoBadge');
+  if(tipo === 'BIO'){
+    badge.innerHTML = '<span class="tipo-badge bio">🦠 Insalubridade &middot; Exposicao Biologica</span>';
+  } else {
+    badge.innerHTML = '<span class="tipo-badge rad">☢️ Periculosidade &middot; Radiacao Ionizante</span>';
+  }
+  document.getElementById('inputNome').value = '';
+  document.getElementById('inputSiape').value = '';
+  document.getElementById('msgErro').style.display = 'none';
+  mostrarTela('telaLogin');
+  document.getElementById('inputNome').focus();
+}
+
+function voltarTipo(){ mostrarTela('telaTipo'); }
+function novaConsulta(){ mostrarTela('telaTipo'); }
+
+/* ══════════════════════════════════════════════════════════════════
+   CONSULTAR
+   ══════════════════════════════════════════════════════════════════ */
+
+function consultar(){
+  var nome = document.getElementById('inputNome').value.trim();
+  var siape = document.getElementById('inputSiape').value.trim().replace(/\D/g,'');
+  var erroEl = document.getElementById('msgErro');
+  erroEl.style.display = 'none';
+
+  if(!nome || nome.length < 3){
+    erroEl.textContent = 'Informe seu nome completo.';
+    erroEl.style.display = 'block';
+    return;
+  }
+  if(!siape || siape.length < 6){
+    erroEl.textContent = 'Informe um SIAPE valido (7 digitos).';
+    erroEl.style.display = 'block';
+    return;
+  }
+
+  var btnEl = document.getElementById('btnConsultar');
+  var loadEl = document.getElementById('loginLoading');
+  btnEl.disabled = true;
+  loadEl.style.display = 'block';
+
+  var prosseguir = function(){
+    var nomeN = norm(nome);
+    var dados = TIPO_SEL === 'BIO' ? DATA_BIO : DATA_RAD;
+
+    /* EXP_BIO usa SIAPE, EXP_RAD usa MATRICULA */
+    var campoId = TIPO_SEL === 'BIO' ? 'SIAPE' : 'MATRICULA';
+
+    /* Buscar registros: ID exato + nome contem */
+    var registros = dados.filter(function(r){
+      var id = String(r[campoId] || '').replace(/\D/g,'');
+      if(id !== siape) return false;
+      return norm(r.NOME).indexOf(nomeN) !== -1;
+    });
+
+    /* Fallback: primeiro + ultimo nome */
+    if(registros.length === 0){
+      var partes = nomeN.split(/\s+/);
+      if(partes.length >= 2){
+        var primeiro = partes[0];
+        var ultimo = partes[partes.length - 1];
+        registros = dados.filter(function(r){
+          var id = String(r[campoId] || '').replace(/\D/g,'');
+          if(id !== siape) return false;
+          var n = norm(r.NOME);
+          return n.indexOf(primeiro) !== -1 && n.indexOf(ultimo) !== -1;
+        });
+      }
+    }
+
+    btnEl.disabled = false;
+    loadEl.style.display = 'none';
+
+    if(registros.length === 0){
+      erroEl.textContent = 'Nenhum registro encontrado. Verifique se o nome e SIAPE estao corretos e se voce possui analise do tipo selecionado.';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    /* Pegar o registro mais recente (ultimo ano + ultimo mes) */
+    registros.sort(function(a,b){
+      var anoA = parseInt(a.ANO) || 0, anoB = parseInt(b.ANO) || 0;
+      if(anoA !== anoB) return anoB - anoA;
+      return getMesIdx(b.MES) - getMesIdx(a.MES);
+    });
+
+    var ultimo = registros[0];
+    mostrarResultado(ultimo);
+  };
+
+  if(!LOADED){
+    carregarDados().then(prosseguir).catch(function(err){
+      btnEl.disabled = false;
+      loadEl.style.display = 'none';
+      erroEl.textContent = 'Erro ao carregar dados: ' + err.message;
+      erroEl.style.display = 'block';
+    });
+  } else {
+    prosseguir();
+  }
+}
+
+/* Enter para consultar */
+document.getElementById('inputNome').addEventListener('keydown', function(e){ if(e.key === 'Enter') consultar(); });
+document.getElementById('inputSiape').addEventListener('keydown', function(e){ if(e.key === 'Enter') consultar(); });
+
+/* ══════════════════════════════════════════════════════════════════
+   MOSTRAR RESULTADO
+   ══════════════════════════════════════════════════════════════════ */
+
+function mostrarResultado(reg){
+  mostrarTela('telaResultado');
+
+  var empNome = String(reg.NOME || '').trim();
+  var empSiape = String(reg.SIAPE || reg.MATRICULA || '').trim();
+  var cargo = String(reg.CARGO || '').trim();
+
+  /* Header */
+  var headerEl = document.getElementById('empHeader');
+  headerEl.className = 'emp-header ' + (TIPO_SEL === 'BIO' ? 'bio' : 'rad');
+
+  var partes = empNome.split(/\s+/);
+  var iniciais = partes.length >= 2 ? partes[0][0] + partes[partes.length-1][0] : partes[0].substring(0,2);
+  document.getElementById('empAvatar').textContent = iniciais.toUpperCase();
+  document.getElementById('empNome').textContent = empNome;
+  document.getElementById('empMeta').innerHTML = 'SIAPE ' + empSiape + (cargo ? ' &middot; ' + cargo : '');
+
+  /* Conteudo */
+  var mesNome = MESES[getMesIdx(reg.MES)] || reg.MES;
+  var ano = reg.ANO || '';
+  var html = '';
+
+  if(TIPO_SEL === 'BIO'){
+    html = renderBio(reg, mesNome, ano);
+  } else {
+    html = renderRad(reg, mesNome, ano);
+  }
+
+  document.getElementById('conteudoResultado').innerHTML = html;
+
+  /* Log de acesso */
+  registrarAcesso(empNome, empSiape, TIPO_SEL === 'BIO' ? 'BIOLOGICO' : 'RADIACAO', mesNome, ano, reg.RESULTADO || '');
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   GRADE VISUAL DE PLANTOES
+   Mostra blocos coloridos: total de plantoes vs com exposicao
+   ══════════════════════════════════════════════════════════════════ */
+
+function renderGrade(total, expostos, tipo, carac){
+  total = parseInt(total) || 0;
+  expostos = parseInt(expostos) || 0;
+  if(total <= 0) return '';
+
+  var corClass = carac ? 'exposto-carac' : ('exposto-' + tipo.toLowerCase());
+  var labelExp = tipo === 'BIO' ? 'Com exposicao' : 'Com radiacao';
+  var labelNorm = tipo === 'BIO' ? 'Sem exposicao' : 'Sem radiacao';
+
+  var h = '<div class="grade-section">';
+  h += '<div class="grade-titulo">Visualizacao dos Plantoes do Mes</div>';
+  h += '<div class="grade-container">';
+
+  for(var i = 1; i <= total; i++){
+    if(i <= expostos){
+      h += '<div class="grade-bloco ' + corClass + '">' + i + '</div>';
+    } else {
+      h += '<div class="grade-bloco normal">' + i + '</div>';
+    }
+  }
+  h += '</div>';
+
+  h += '<div class="grade-legenda">';
+  h += '<span><span class="dot" style="background:' + (carac ? 'var(--vr)' : (tipo === 'BIO' ? 'var(--bio)' : 'var(--rad)')) + '"></span> ' + labelExp + ' (' + expostos + ')</span>';
+  h += '<span><span class="dot" style="background:#e5e7eb"></span> ' + labelNorm + ' (' + (total - expostos) + ')</span>';
+  h += '</div>';
+  h += '</div>';
+
+  return h;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RENDER BIO
+   Colunas: ANO, MES, SIAPE, NOME, CARGO, PLANTAO_INF, PLANTAO,
+            INDICE_PCT, RESULTADO
+   ══════════════════════════════════════════════════════════════════ */
+
+function renderBio(r, mesNome, ano){
+  var pct = parseFloat(String(r.INDICE_PCT || '0').replace('%','')) || 0;
+  var carac = String(r.RESULTADO || '').indexOf('CARACTERIZADA') !== -1 && String(r.RESULTADO || '').indexOf('NAO') === -1;
+  var pli = parseInt(r.PLANTAO_INF) || 0;
+  var plt = parseInt(r.PLANTAO) || 0;
+
+  /* Se INDICE_PCT veio zerado mas temos PLI/PLT, recalcular */
+  if(pct === 0 && plt > 0 && pli > 0){
+    pct = Math.round(pli / plt * 100);
+  }
+
+  var h = '';
+  h += '<div class="competencia-tag bio">📅 Competencia: <b>' + mesNome + '/' + ano + '</b></div>';
+  h += '<div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--az)">Exposicao Biologica (Infectocontagiosas)</div>';
+
+  h += '<div class="info-row"><span class="lbl">Plantoes com exposicao a pacientes infectocontagiosos</span><span class="val">' + pli + '</span></div>';
+  h += '<div class="info-row"><span class="lbl">Total de plantoes realizados no mes</span><span class="val">' + plt + '</span></div>';
+
+  /* Grade visual */
+  h += renderGrade(plt, pli, 'BIO', carac);
+
+  /* Indice */
+  h += '<div class="indice-visual">';
+  h += '<div class="indice-titulo">Indice de Exposicao (PLI / PLT)</div>';
+  h += '<div class="indice-valor ' + (carac ? 'carac' : 'nao-bio') + '">' + pct + '%</div>';
+  h += '<div class="indice-barra"><div class="indice-fill ' + (carac ? 'carac' : 'bio') + '" style="width:' + Math.min(pct, 100) + '%"></div><div class="indice-limite" style="left:50%"></div></div>';
+  h += '<div class="indice-meta"><span>0%</span><span style="color:var(--vr);font-weight:600">&#9650; Limite: 50%</span><span>100%</span></div>';
+  h += '</div>';
+
+  /* Resultado */
+  if(carac){
+    h += '<div class="resultado-box carac">';
+    h += '<div class="resultado-titulo carac">INSALUBRIDADE CARACTERIZADA</div>';
+    h += '<div class="resultado-desc">Seu indice de exposicao atingiu ou ultrapassou <b>50%</b>, o que caracteriza <b>insalubridade de grau maximo</b> conforme NR-15, Anexo 14.<br><br>Voce tem direito ao <b>adicional de insalubridade (40%)</b> referente a esta competencia.<br><br><span style="font-size:11px;color:var(--mt)">Resultado obtido por metodologia tecnica da USOST-HUL, fundamentada nos criterios da NR-15, Anexo 14, e no POP de Avaliacao de Risco Ocupacional.</span></div>';
+    h += '</div>';
+  } else {
+    h += '<div class="resultado-box nao">';
+    h += '<div class="resultado-titulo nao">INSALUBRIDADE NAO CARACTERIZADA</div>';
+    h += '<div class="resultado-desc">Seu indice de exposicao ficou abaixo de <b>50%</b>. Nao houve caracterizacao de insalubridade de grau maximo neste mes, conforme NR-15, Anexo 14.<br><br><span style="font-size:11px;color:var(--mt)">Resultado obtido por metodologia tecnica da USOST-HUL, fundamentada nos criterios da NR-15, Anexo 14, e no POP de Avaliacao de Risco Ocupacional.</span></div>';
+    h += '</div>';
+  }
+
+  return h;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RENDER RAD
+   Colunas: ANO, MES, MATRICULA, NOME, CARGO, CIRURGIAS,
+            DIAS_EXPOSICAO, PLANTAO_ESPERADO, INDICE_PCT, RESULTADO
+   ══════════════════════════════════════════════════════════════════ */
+
+function renderRad(r, mesNome, ano){
+  var pct = parseFloat(String(r.INDICE_PCT || '0').replace('%','')) || 0;
+  var carac = String(r.RESULTADO || '').indexOf('CARACTERIZADA') !== -1 && String(r.RESULTADO || '').indexOf('NAO') === -1;
+  var diasExp = parseInt(r.DIAS_EXPOSICAO) || 0;
+  var pltEsp = parseInt(r.PLANTAO_ESPERADO) || 0;
+  var cirurgias = parseInt(r.CIRURGIAS) || 0;
+
+  /* Recalcular se necessario */
+  if(pct === 0 && pltEsp > 0 && diasExp > 0){
+    pct = Math.round(diasExp / pltEsp * 100);
+  }
+
+  var h = '';
+  h += '<div class="competencia-tag rad">📅 Competencia: <b>' + mesNome + '/' + ano + '</b></div>';
+  h += '<div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--rad)">Exposicao a Radiacao Ionizante (Arco Cirurgico)</div>';
+
+  h += '<div class="info-row"><span class="lbl">Cirurgias com arco cirurgico</span><span class="val">' + cirurgias + '</span></div>';
+  h += '<div class="info-row"><span class="lbl">Dias com exposicao a radiacao</span><span class="val">' + diasExp + '</span></div>';
+  h += '<div class="info-row"><span class="lbl">Plantao esperado no mes</span><span class="val">' + pltEsp + '</span></div>';
+
+  /* Grade visual */
+  h += renderGrade(pltEsp, diasExp, 'RAD', carac);
+
+  /* Indice */
+  h += '<div class="indice-visual">';
+  h += '<div class="indice-titulo">Indice de Exposicao (Dias / Plantao Esperado)</div>';
+  h += '<div class="indice-valor ' + (carac ? 'carac' : 'nao-rad') + '">' + pct + '%</div>';
+  h += '<div class="indice-barra"><div class="indice-fill ' + (carac ? 'carac' : 'rad') + '" style="width:' + Math.min(pct * 2, 100) + '%"></div><div class="indice-limite" style="left:50%"></div></div>';
+  h += '<div class="indice-meta"><span>0%</span><span style="color:var(--vr);font-weight:600">&#9650; Limite: 25%</span><span>50%+</span></div>';
+  h += '</div>';
+
+  /* Resultado */
+  if(carac){
+    h += '<div class="resultado-box carac">';
+    h += '<div class="resultado-titulo carac">PERICULOSIDADE CARACTERIZADA</div>';
+    h += '<div class="resultado-desc">Seu indice de exposicao atingiu ou ultrapassou <b>25%</b>, o que caracteriza <b>periculosidade</b> conforme NR-16.<br><br>Voce tem direito ao <b>adicional de periculosidade (30%)</b> referente a esta competencia.<br><br><span style="font-size:11px;color:var(--mt)">Resultado obtido por metodologia tecnica da USOST-HUL, fundamentada nos criterios da NR-16 e no POP de Avaliacao de Risco Ocupacional.</span></div>';
+    h += '</div>';
+  } else {
+    h += '<div class="resultado-box nao">';
+    h += '<div class="resultado-titulo nao">PERICULOSIDADE NAO CARACTERIZADA</div>';
+    h += '<div class="resultado-desc">Seu indice de exposicao ficou abaixo de <b>25%</b>. Nao houve caracterizacao de periculosidade neste mes, conforme NR-16.<br><br><span style="font-size:11px;color:var(--mt)">Resultado obtido por metodologia tecnica da USOST-HUL, fundamentada nos criterios da NR-16 e no POP de Avaliacao de Risco Ocupacional.</span></div>';
+    h += '</div>';
+  }
+
+  return h;
+}
+
+</script>
+</body>
+</html>
